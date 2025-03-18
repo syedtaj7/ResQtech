@@ -1,13 +1,222 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  border-radius: 0.5rem;
+  position: relative;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.leaflet-control-container .leaflet-control {
+  z-index: 999;
+}
+
+.leaflet-bottom,
+.leaflet-control,
+.leaflet-pane,
+.leaflet-top {
+  z-index: 0 !important;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  background: white;
+  color: #333;
+  border-radius: 0.5rem;
+  padding: 0;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 0;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: white;
+}
+
+.map-tiles {
+  filter: saturate(1.2) contrast(1.1);
+  mask-mode: alpha;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-mode: alpha;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+
+/* Add these to your existing styles */
+.disaster-marker {
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.disaster-marker.high {
+  background-color: #ef4444;
+}
+
+.disaster-marker.moderate {
+  background-color: #f59e0b;
+}
+
+.disaster-marker.low {
+  background-color: #10b981;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: transparent;
+}
+
+/* Add custom tooltip styles */
+.custom-tooltip {
+  background-color: white;
+  border: none;
+  border-radius: 0.375rem;
+  padding: 0;
+  z-index: 1001 !important;
+  width: 300px !important;    /* Set fixed width */
+  max-width: 300px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+.custom-tooltip .leaflet-tooltip-content {
+  margin: 0;
+  padding: 1rem !important;  /* Add padding */
+  white-space: normal !important;
+}
+
+.custom-tooltip::before {
+  display: none;
+}
+
+/* Hide attribution outside India bounds */
+.leaflet-container .leaflet-control-attribution {
+  background-color: transparent !important;
+  color: #666;
+}
+
+/* Add custom tooltip positioning */
+.leaflet-tooltip {
+  max-width: 300px;
+  white-space: normal !important;
+}
+
+/* Popup styles */
+.leaflet-popup {
+  max-width: 300px !important;
+  max-height: 80vh;
+  margin-bottom: 0;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  max-height: 60vh;
+  max-width: 400px !important; /* Increase max width */
+  width: 350px !important;     /* Set fixed width */
+  overflow-y: auto;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  width: 300px !important;
+  width: 100% !important;
+  overflow-y: auto;
+  max-height: 60vh;          /* Limit height */
+  padding: 1rem !important;  /* Add padding */
+}
+
+/* Ensure popup stays in view */
+.leaflet-container {
+  position: relative;
+}
+
+/* Auto-positioning for popups */
+.leaflet-popup-tip-container {
+  margin-top: -1px;
+  pointer-events: none;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Handle popup overflow */
+.leaflet-popup-scrolled {
+  border: none;
+  overflow: hidden;
+}
+
+/* Adjust tooltip arrow */
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  border: none !important;
+}
+
+/* Improve scrollbar styling */
+.leaflet-popup-content-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.leaflet-popup-content-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.leaflet-popup-content-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.leaflet-popup-content-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Update popup positioning styles */
+.leaflet-popup {
+  max-width: 300px !important;
+}
+
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+/* Auto-adjust popup tip position */
+.leaflet-popup-tip-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Top popups */
+.leaflet-popup.leaflet-popup-top .leaflet-popup-tip-container {
+  top: 100%;
+}
+
+/* Bottom popups */
+.leaflet-popup.leaflet-popup-bottom .leaflet-popup-tip-container {
+  bottom: 100%;
 }
