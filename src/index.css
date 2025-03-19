@@ -66,23 +66,30 @@
   background-color: #10b981;
 }
 
+/* Update existing scrollbar styles */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  overflow-y: auto;
+  max-height: calc(100vh - 16rem);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(155, 155, 155, 0.5);
-  border-radius: 20px;
-  border: transparent;
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
 }
 
 /* Add custom tooltip styles */
@@ -105,6 +112,28 @@
 
 .custom-tooltip::before {
   display: none;
+}
+
+/* Custom tooltip styles */
+.custom-tooltip {
+  background: white !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  padding: 0 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  font-size: 0.875rem !important;
+}
+
+.custom-tooltip .leaflet-tooltip-content {
+  margin: 0 !important;
+}
+
+.custom-tooltip.leaflet-tooltip-top:before {
+  border-top-color: white !important;
+}
+
+.custom-tooltip.leaflet-tooltip-bottom:before {
+  border-bottom-color: white !important;
 }
 
 /* Hide attribution outside India bounds */
@@ -134,6 +163,9 @@
   max-width: 400px !important; /* Increase max width */
   width: 350px !important;     /* Set fixed width */
   overflow-y: auto;
+  max-height: none !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 }
 
 .leaflet-popup-content {
@@ -143,6 +175,8 @@
   overflow-y: auto;
   max-height: 60vh;          /* Limit height */
   padding: 1rem !important;  /* Add padding */
+  max-height: none !important;
+  height: auto;
 }
 
 /* Ensure popup stays in view */
@@ -176,21 +210,21 @@
 
 /* Improve scrollbar styling */
 .leaflet-popup-content-wrapper::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .leaflet-popup-content-wrapper::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 3px;
 }
 
 .leaflet-popup-content-wrapper::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
 }
 
 .leaflet-popup-content-wrapper::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background-color: rgba(156, 163, 175, 0.7);
 }
 
 /* Update popup positioning styles */
@@ -219,4 +253,494 @@
 /* Bottom popups */
 .leaflet-popup.leaflet-popup-bottom .leaflet-popup-tip-container {
   bottom: 100%;
+}
+
+/* Custom popup styles */
+.custom-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 0;
+  width: 300px !important;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: white;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Add these new styles */
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.min-h-0 {
+  min-height: 0;
+}
+
+/* Sticky header styles */
+.sticky {
+  position: sticky;
+  background-color: rgb(31, 41, 55);
+  margin-top: -0.5rem;
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+  padding: 0.5rem 1.25rem;
+}
+
+/* Safe zone card styles */
+.safe-zone-card {
+  background-color: rgb(55, 65, 81);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: background-color 0.2s;
+}
+
+.safe-zone-card:hover {
+  background-color: rgb(75, 85, 99);
+}
+
+/* Safe zone card container */
+.safe-zones-container {
+  overflow-y: auto;
+  max-height: calc(100vh - 20rem);
+  padding-right: 0.5rem;
+}
+
+/* Sticky headers */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  background-color: rgb(31, 41, 55);
+  padding: 1rem 0;
+  z-index: 10;
+}
+
+/* Add these styles for better container handling */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Sticky header styles */
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: rgb(31, 41, 55);
+}
+
+/* Container height adjustments */
+.h-map {
+  height: 600px;
+}
+
+.max-h-content {
+  max-height: calc(100% - 3rem);
+}
+
+/* Safe zone containers */
+.safe-zone-container {
+  background-color: rgb(31, 41, 55);
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(75, 85, 99, 0.4);
+}
+
+/* Safe zone header */
+.safe-zone-header {
+  padding: 1rem;
+  background-color: rgba(55, 65, 81, 0.8);
+  border-bottom: 1px solid rgba(75, 85, 99, 0.4);
+}
+
+/* Safe zone content */
+.safe-zone-content {
+  padding: 1rem;
+}
+
+/* Safe zone card */
+.safe-zone-card {
+  background-color: rgb(55, 65, 81);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.safe-zone-card:hover {
+  background-color: rgb(75, 85, 99);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Transport option cards */
+.transport-option {
+  background-color: rgb(55, 65, 81);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s;
+  border: 1px solid rgba(75, 85, 99, 0.4);
+}
+
+.transport-option:hover {
+  background-color: rgb(75, 85, 99);
+}
+
+.transport-option.recommended {
+  border-color: rgba(59, 130, 246, 0.5);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Facility tags */
+.facility-tag {
+  background-color: #4b5563; /* bg-gray-600 */
+  font-size: 0.75rem; /* text-xs */
+  color: #e5e7eb; /* text-gray-200 */
+  padding: 0.25rem 0.5rem; /* px-2 py-1 */
+  border-radius: 9999px; /* rounded-full */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Safety score indicator */
+.safety-score {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+.score-indicator {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 9999px;
+  margin-right: 0.5rem;
+}
+
+/* Custom scrollbar for containers */
+.safe-zone-scroll {
+  max-height: calc(100vh - 16rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  padding-right: 0.5rem;
+}
+
+/* Section dividers */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(75, 85, 99, 0.4), transparent);
+  margin: 1rem 0;
+}
+
+/* Ensure container fills available space */
+.h-full {
+  height: 100%;
+}
+
+/* Update container height proportions */
+.nearest-zone-container {
+  max-height: 30%;
+  transition: max-height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.nearest-zone-container.hidden {
+  max-height: 0;
+  margin: 0;
+}
+
+.safe-zones-list {
+  height: 70%;
+  overflow-y: auto;
+}
+
+/* Adjust content containers */
+.content-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(600px - 2rem);
+  gap: 1rem;
+}
+
+/* Animations */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Additional utility classes */
+.bg-gray-750 {
+  background-color: rgba(31, 41, 55, 0.7);
+}
+
+.bg-gray-650 {
+  background-color: rgba(75, 85, 99, 0.8);
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: rgb(31, 41, 55);
+  border-radius: 0.75rem;
+  width: 100%;
+  max-width: 36rem;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Remove double scrollbar */
+.modal-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Container heights */
+.h-map-container {
+  height: 600px;
+}
+
+.h-sidebar {
+  height: 600px;
+}
+
+/* Scrollable content area */
+.content-scroll {
+  max-height: calc(100vh - 10rem);
+  overflow-y: auto;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background-color: rgb(31, 41, 55);
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* Update container height */
+.h-map-container {
+  height: 600px !important;
+  max-height: 600px !important;
+}
+
+/* Ensure content fits */
+.content-scroll {
+  height: calc(600px - 4rem);
+  overflow-y: auto;
+}
+
+/* Clean up container styles */
+.right-sidebar {
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(31, 41, 55);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Modal styles */
+.details-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.modal-container {
+  background-color: #1f2937; /* bg-gray-800 */
+  border-radius: 0.75rem; /* rounded-xl */
+  width: 100%; /* w-full */
+  max-width: 42rem; /* max-w-2xl */
+  max-height: 90vh; /* max-h-[90vh] */
+  overflow: hidden; /* overflow-hidden */
+}
+
+.modal-header {
+  position: sticky;
+  top: 0;
+  background-color: rgb(31, 41, 55);
+  border-bottom: 1px solid rgba(75, 85, 99, 0.4);
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.modal-content {
+  overflow-y: auto;
+  padding: 1.5rem; /* Tailwind's p-6 equivalent */
+  max-height: calc(90vh - 4rem);
+}
+
+.info-section {
+  background-color: rgb(55, 65, 81);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.transport-card {
+  background-color: #374151; /* bg-gray-700 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem; /* p-3 */
+  display: flex; /* flex */
+  align-items: flex-start; /* items-start */
+  gap: 0.75rem; /* gap-3 */
+  word-break: break-word;
+}
+
+/* Map container styles */
+.map-container {
+  height: calc(100vh - 14rem);
+  min-height: 500px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Right sidebar scroll container */
+.sidebar-scroll {
+  height: calc(100vh - 16rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+/* Footer spacing */
+.footer-spacer {
+  margin-top: auto;
+}
+
+/* Map wrapper */
+.leaflet-container {
+  height: 100% !important;
+  width: 100%;
+  border-radius: 0.5rem;
+}
+
+/* Dropdown styles */
+.location-dropdown {
+  position: absolute;
+  width: 100%;
+  background-color: rgb(55, 65, 81);
+  border: 1px solid rgb(75, 85, 99);
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  max-height: 15rem;
+  overflow-y: auto;
+  z-index: 50;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.location-dropdown button {
+  transition: background-color 0.2s;
+}
+
+.location-dropdown button:hover {
+  background-color: rgb(75, 85, 99);
+}
+
+/* Add this to handle clicking outside dropdown */
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
 }
