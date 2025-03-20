@@ -69,13 +69,13 @@
 /* Update existing scrollbar styles */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
   overflow-y: auto;
   max-height: calc(100vh - 16rem);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -84,8 +84,8 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 2px;
+  background-color: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -341,11 +341,11 @@
 /* Add these styles for better container handling */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -354,8 +354,8 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 2px;
+  background-color: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -743,4 +743,240 @@
   position: fixed;
   inset: 0;
   z-index: 40;
+}
+
+/* Dropdown styles */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+select option {
+  padding: 0.5rem;
+  background-color: rgb(55, 65, 81);
+  color: white;
+}
+
+select option:hover {
+  background-color: rgb(75, 85, 99);
+}
+
+/* Improved image upload container */
+.image-upload-container {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Community Help Page Styles */
+.alert-card {
+  background-color: rgb(55, 65, 81);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.alert-card:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.alert-image {
+  width: 8rem;
+  height: 8rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition-property: transform;
+  transition-duration: 200ms;
+}
+
+.alert-image:hover {
+  transform: scale(1.05);
+}
+
+.upvote-button {
+  display: flex;
+  align-items: center;
+  margin-right: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  transition-property: all;
+  transition-duration: 200ms;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.form-container {
+  background-color: rgba(31, 41, 55, 0.9);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(55, 65, 81, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: rgba(55, 65, 81, 0.9);
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  transition: box-shadow 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.input-field:hover {
+  border-color: rgba(75, 85, 99, 0.5);
+}
+
+.alert-feed {
+  gap: 1.5rem;
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  padding-right: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add to src/index.css */
+.input-field[type="select"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+}
+
+/* Enhanced Dropdown Styles */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.75rem;
+  height: 0.75rem;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background-color: rgb(55, 65, 81);
+  color: white;
+  border: 1px solid rgb(75, 85, 99);
+  transition: all 0.2s;
+  appearance: none;
+  cursor: pointer;
+  appearance: none;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background-color: rgb(55, 65, 81);
+  border: 1px solid rgb(75, 85, 99);
+  border-radius: 0.5rem;
+  color: white;
+  transition: all 0.2s;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgb(59, 130, 246);
+}
+
+.custom-select:hover {
+  background-color: rgb(75, 85, 99);
+}
+
+.custom-select option {
+  background-color: rgb(55, 65, 81);
+  color: white;
+  padding: 0.5rem 0;
+}
+
+.custom-select option:hover {
+  background-color: rgb(75, 85, 99);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #d1d5db;
+}
+
+/* Alert Card Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Alert Card Styles */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.alert-card {
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(8px);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
+}
+
+/* Hover Effects */
+.hover-scale {
+  transition: transform 0.2s;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
 }

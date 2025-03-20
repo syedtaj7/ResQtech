@@ -4,8 +4,15 @@ import Relocation from "./pages/Relocation"; // Fix the import path
 import CommunityHelp from "./pages/communityHelp";
 import Mitigation from "./pages/Mitigation";
 import About from "./pages/About";
+import { startBackgroundAnalysis } from './services/backgroundService';
+import { useEffect } from 'react';
 
 function App() {
+  useEffect(() => {
+    const cleanup = startBackgroundAnalysis();
+    return () => clearInterval(cleanup);
+  }, []);
+
   return (
     <Router>
       <Routes>
