@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { DISASTER_GUIDES } from '../data/disasterGuides';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WhatsappShareButton, WhatsappIcon } from 'react-share';
@@ -667,9 +667,20 @@ const DisasterSection = ({ section, activeTab, onGuideSelect }) => (
 );
 
 function Mitigation() {
-  const [activeTab, setActiveTab] = useState('pre');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'pre');
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarkedGuides', []);
+
+  useEffect(() => {
+    // Handle incoming disaster selection
+    if (location.state?.selectedDisaster) {
+      const guide = DISASTER_GUIDES[location.state.activeTab][location.state.selectedDisaster]?.[0];
+      if (guide) {
+        setSelectedGuide(guide);
+      }
+    }
+  }, [location.state]);
 
   const isBookmarked = useCallback((guide) => {
     return bookmarks.some(b => b.title === guide.title);

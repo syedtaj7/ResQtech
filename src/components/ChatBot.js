@@ -60,6 +60,9 @@ const ChatBot = () => {
     setInputMessage('');
     setIsTyping(true);
 
+    // Process message through handleMessageSend
+    handleMessageSend(inputMessage);
+
     // Simulate bot thinking
     setTimeout(() => {
       const response = generateResponse(inputMessage);
@@ -85,8 +88,91 @@ const ChatBot = () => {
   };
 
   const handleLinkClick = (link) => {
-    navigate(link);
+    // Extract the disaster type from the link
+    const disasterType = link.split('/').pop();
+    
+    // Navigate to mitigation page with the correct tab and disaster selected
+    if (link.includes('mitigation')) {
+      navigate('/mitigation', { 
+        state: { 
+          activeTab: 'pre',
+          selectedDisaster: disasterType 
+        } 
+      });
+    } else if (link.includes('recovery')) {
+      navigate('/mitigation', { 
+        state: { 
+          activeTab: 'post',
+          selectedDisaster: disasterType 
+        } 
+      });
+    }
     setIsOpen(false);
+  };
+
+  // Add this mapping of keywords to disaster IDs
+  const disasterMapping = {
+    'flood': 'floods',
+    'earthquake': 'earthquakes',
+    'cyclone': 'cyclones',
+    'landslide': 'landslides',
+    'wildfire': 'wildfires',
+    'industrial': 'industrialAccidents',
+    'structural': 'structuralCollapse',
+    'terrorist': 'terroristAttacks',
+    'heat wave': 'heatwave',
+    'cold wave': 'coldwave',
+    'drought': 'drought',
+    'air quality': 'airQuality',
+    'storm': 'thunderstorms',
+    'pandemic': 'pandemic',
+    'tsunami': 'tsunami',
+    'volcano': 'volcano',
+    'avalanche': 'avalanche',
+    'cyber': 'cyberAttack',
+    'nuclear': 'nuclearIncident',
+    'chemical': 'chemicalSpill',
+    'epidemic': 'epidemic',
+    'bioterrorism': 'bioterrorism',
+    'pest': 'pestInfestation',
+    'invasive': 'invasiveSpecies'
+  };
+
+  // Add this function to handle guide navigation
+  const handleViewGuide = (message) => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Determine if it's prevention or recovery
+    const isPrevention = lowerMessage.includes('prevent') || 
+                        lowerMessage.includes('prepare') || 
+                        lowerMessage.includes('before');
+
+    // Find matching disaster type
+    const disasterType = Object.entries(disasterMapping).find(([key]) => 
+      lowerMessage.includes(key)
+    )?.[1];
+
+    if (disasterType) {
+      navigate('/mitigation', {
+        state: {
+          activeTab: isPrevention ? 'pre' : 'post',
+          selectedDisaster: disasterType
+        }
+      });
+      setIsOpen(false); // Close chatbot after navigation
+    }
+  };
+
+  // Update your existing message handler to include guide navigation
+  const handleMessageSend = (message) => {
+    // ... existing message handling code ...
+
+    if (message.toLowerCase().includes('view') && 
+        message.toLowerCase().includes('guide')) {
+      handleViewGuide(message);
+    }
+
+    // ... rest of your existing code ...
   };
 
   return (
