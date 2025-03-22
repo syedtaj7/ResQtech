@@ -73,6 +73,42 @@ const debounce = (func, wait) => {
   };
 };
 
+// Add this function at the top level
+const fetchNearbyHospitals = async (lat, lon, radius = 5000) => {
+  try {
+    const query = `
+      [out:json][timeout:25];
+      (
+        node["amenity"="hospital"](around:${radius},${lat},${lon});
+        way["amenity"="hospital"](around:${radius},${lat},${lon});
+        relation["amenity"="hospital"](around:${radius},${lat},${lon});
+      );
+      out body;
+      >;
+      out skel qt;
+    `;
+
+    const response = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: query
+    });
+
+    const data = await response.json();
+    return data.elements.map(element => ({
+      id: element.id,
+      name: element.tags?.name || 'Unnamed Hospital',
+      coordinates: [element.lat, element.lon],
+      type: element.tags?.healthcare || 'Hospital',
+      emergency: element.tags?.emergency || 'yes',
+      phone: element.tags?.phone || 'N/A',
+      address: element.tags?.['addr:full'] || element.tags?.['addr:street'] || 'Address not available'
+    }));
+  } catch (error) {
+    console.error('Error fetching nearby hospitals:', error);
+    return [];
+  }
+};
+
 function Relocation() {
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -211,21 +247,62 @@ const handleLocationSearch = useCallback(async (searchQuery) => {
 
   try {
     setLoading(true);
-    const response = await fetch(
+    // 1. First get coordinates of searched location
+    const locationResponse = await fetch(
       `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}, India&countrycodes=in&limit=1&addressdetails=1`
     );
-    const data = await response.json();
+    const locationData = await locationResponse.json();
     
-    if (data.length > 0) {
-      const location = data[0];
-      const coords = [parseFloat(location.lat), parseFloat(location.lon)];
-      setUserLocation(coords);
+    if (locationData.length > 0) {
+      const location = locationData[0];
+      const searchedCoords = [parseFloat(location.lat), parseFloat(location.lon)];
+      setUserLocation(searchedCoords);
       
-      // Get nearest safe zone with proper distance calculation
+      // 2. Fetch hospitals near the searched location
+      const hospitalsQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="hospital"](around:10000,${searchedCoords[0]},${searchedCoords[1]});
+          way["amenity"="hospital"](around:10000,${searchedCoords[0]},${searchedCoords[1]});
+          relation["amenity"="hospital"](around:10000,${searchedCoords[0]},${searchedCoords[1]});
+        );
+        out body;
+        >;
+        out skel qt;
+      `;
+
+      const hospitalsResponse = await fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        body: hospitalsQuery
+      });
+
+      const hospitalsData = await hospitalsResponse.json();
+      
+      // 3. Process hospital data
+      const nearbyHospitals = hospitalsData.elements
+        .filter(element => element.tags && element.tags.name)
+        .map(hospital => ({
+          id: hospital.id,
+          name: hospital.tags.name,
+          coordinates: [hospital.lat, hospital.lon],
+          type: hospital.tags.healthcare || 'Hospital',
+          emergency: hospital.tags.emergency || 'yes',
+          phone: hospital.tags.phone || hospital.tags['contact:phone'] || 'N/A',
+          address: hospital.tags['addr:full'] || hospital.tags['addr:street'] || 'Address not available',
+          distance: calculateDistance(
+            searchedCoords[0],
+            searchedCoords[1],
+            hospital.lat,
+            hospital.lon
+          ).toFixed(1)
+        }))
+        .sort((a, b) => parseFloat(a.distance) - parseFloat(b.distance));
+
+      // 4. Find nearest safe zone
       const nearest = locations.reduce((closest, loc) => {
         const distance = calculateDistance(
-          coords[0],
-          coords[1],
+          searchedCoords[0],
+          searchedCoords[1],
           loc.coordinates[0],
           loc.coordinates[1]
         );
@@ -239,9 +316,18 @@ const handleLocationSearch = useCallback(async (searchQuery) => {
         setNearestSafeZone({
           ...nearest,
           userState: location.address?.state || 'Unknown Location',
+          searchedLocation: {
+            name: location.display_name,
+            coordinates: searchedCoords
+          },
+          nearbyHospitals: nearbyHospitals.slice(0, 5) // Show top 5 nearest hospitals
         });
-        const details = calculateTravelDetails(coords, nearest);
+
+        const details = calculateTravelDetails(searchedCoords, nearest);
         setTravelDetails(details);
+
+        // Log found hospitals for debugging
+        console.log(`Found ${nearbyHospitals.length} hospitals near ${searchQuery}`);
       }
     }
   } catch (error) {
@@ -334,6 +420,23 @@ const getFilteredSafeZones = useCallback((searchTerm) => {
 
 // Update the LocationDetailsModal component
 const LocationDetailsModal = ({ location, onClose }) => {
+  const [nearbyHospitals, setNearbyHospitals] = useState([]);
+  const [loadingHospitals, setLoadingHospitals] = useState(true);
+
+  useEffect(() => {
+    const loadHospitals = async () => {
+      if (location?.coordinates) {
+        setLoadingHospitals(true);
+        const [lat, lon] = location.coordinates;
+        const hospitals = await fetchNearbyHospitals(lat, lon);
+        setNearbyHospitals(hospitals);
+        setLoadingHospitals(false);
+      }
+    };
+
+    loadHospitals();
+  }, [location]);
+
   if (!location) return null;
   
   return (
@@ -438,6 +541,50 @@ const LocationDetailsModal = ({ location, onClose }) => {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Add Nearby Hospitals Section */}
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-white mb-3">
+              <span className="mr-2">🏥</span>
+              Nearby Hospitals
+            </h3>
+            {loadingHospitals ? (
+              <div className="animate-pulse space-y-3">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-gray-700 h-16 rounded-lg"></div>
+                ))}
+              </div>
+            ) : nearbyHospitals.length > 0 ? (
+              <div className="space-y-3">
+                {nearbyHospitals.map(hospital => (
+                  <div key={hospital.id} className="bg-gray-700 p-4 rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-white font-medium">{hospital.name}</h4>
+                        <p className="text-gray-400 text-sm">{hospital.address}</p>
+                        {hospital.phone !== 'N/A' && (
+                          <p className="text-gray-400 text-sm">📞 {hospital.phone}</p>
+                        )}
+                      </div>
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${hospital.coordinates[0]},${hospital.coordinates[1]}&travelmode=driving`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded flex items-center"
+                      >
+                        <span className="mr-1">🚗</span>
+                        Directions
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-400">
+                No hospitals found in the nearby area
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -752,6 +899,38 @@ const LocationDetailsModal = ({ location, onClose }) => {
                     >
                       View Full Details →
                     </button>
+                    {/* Add Nearby Hospitals Section */}
+                    {nearestSafeZone.nearbyHospitals && nearestSafeZone.nearbyHospitals.length > 0 && (
+                      <div className="border-t border-gray-600 pt-4 mt-4">
+                        <h4 className="text-sm font-semibold text-white mb-3">
+                          <span className="mr-2">🏥</span>
+                          Nearby Hospitals
+                        </h4>
+                        <div className="space-y-2">
+                          {nearestSafeZone.nearbyHospitals.slice(0, 3).map((hospital, index) => (
+                            <div key={index} className="bg-gray-600 rounded p-2">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <p className="text-sm text-white">{hospital.name}</p>
+                                  <p className="text-xs text-gray-400">{hospital.distance}km away</p>
+                                </div>
+                                <a
+                                  href={`https://www.google.com/maps/dir/?api=1&destination=${hospital.coordinates[0]},${hospital.coordinates[1]}&travelmode=driving`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-white"
+                                >
+                                  🚗 Route
+                                </a>
+                              </div>
+                              {hospital.phone !== 'N/A' && (
+                                <p className="text-xs text-gray-400 mt-1">📞 {hospital.phone}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

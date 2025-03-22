@@ -96,6 +96,44 @@ const INDIAN_STATES = [
   'Puducherry'
 ];
 
+// Add these styles near the top of your file, after imports
+const gradientButtonStyle = `
+  relative overflow-hidden
+  bg-gradient-to-r from-blue-600 to-purple-600 
+  hover:from-blue-500 hover:to-purple-500
+  text-white font-medium
+  rounded-xl
+  transition-all duration-300
+  transform hover:scale-[1.02]
+  focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900
+`;
+
+// Update the alert card styles
+const alertCardStyle = `
+  bg-gray-800/50 backdrop-blur-sm
+  border border-gray-700/50
+  rounded-xl p-6
+  transform transition-all duration-300
+  hover:border-blue-500/30
+  hover:bg-gray-800/70
+`;
+
+// Modify the main content area styling
+const mainContentStyle = `
+  flex-grow p-8 
+  bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800
+`;
+
+// Update form input styles
+const inputStyle = `
+  w-full px-4 py-3 
+  bg-gray-800/50 
+  border border-gray-700 
+  rounded-xl
+  focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 
+  transition-all duration-300
+  placeholder-gray-500
+`;
 
 // Add after imports, before CommunityHelp function
 const ImageModal = ({ imageUrl, onClose }) => {
@@ -560,107 +598,132 @@ const handleSaveAlert = async (alertItem) => {
         </nav>
       </header>
 
-      <main className="flex-grow p-8">
+      <main className={mainContentStyle}>
         {!user ? (
-          <div className="max-w-md w-full space-y-8 bg-gray-800 rounded-xl p-8 shadow-2xl">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2">
-                {isLoginMode ? 'Welcome Back' : 'Create Account'}
-              </h2>
-              <p className="text-gray-400">
-                {isLoginMode 
-                  ? 'Sign in to connect with the community' 
-                  : 'Join the ResQTech community today'}
-              </p>
-            </div>
-
-            {/* Google Sign In Button */}
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 py-2.5 rounded-lg hover:bg-gray-100 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-gray-400/20 border-t-gray-600 rounded-full animate-spin"></div>
-                  <span>Signing in...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
-                    />
-                  </svg>
-                  Continue with Google
-                </>
-              )}
-            </button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-800 text-gray-400">Or continue with email</span>
-              </div>
-            </div>
-
-            {authError && (
-              <div className="bg-red-500/10 text-red-400 px-4 py-2 rounded-lg text-sm">
-                {authError}
-              </div>
-            )}
-
-            <form onSubmit={handleAuth} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Email address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-shadow"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-shadow"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 py-3 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    {isLoginMode ? 'Signing in...' : 'Creating account...'}
+          <div className="min-h-screen flex items-center justify-center px-4 bg-gray-900 bg-auth-pattern">
+            <div className="w-full max-w-md animate-slideUp">
+              <div className="relative group">
+                {/* Decorative elements */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+                
+                <div className="relative px-8 py-10 bg-gray-900 ring-1 ring-gray-800/50 rounded-2xl backdrop-blur-xl">
+                  {/* Header */}
+                  <div className="text-center space-y-6 mb-8">
+                    <div className="relative inline-block animate-float">
+                      <div className="absolute inset-0 bg-blue-500 rounded-full blur-xl opacity-20"></div>
+                      <svg className="w-16 h-16 text-blue-500 relative" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                          d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" 
+                        />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} 
+                          d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" 
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold">
+                      <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        {isLoginMode ? 'Welcome Back' : 'Join ResQTech'}
+                      </span>
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                      {isLoginMode 
+                        ? 'Sign in to connect with your community' 
+                        : 'Create an account to start helping others'}
+                    </p>
                   </div>
-                ) : (
-                  isLoginMode ? 'Sign in' : 'Create account'
-                )}
-              </button>
-            </form>
 
-            <button
-              onClick={() => {
-                setIsLoginMode(!isLoginMode);
-                setAuthError('');
-              }}
-              className="w-full text-center text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              {isLoginMode ? 'Need an account? Register' : 'Have an account? Sign in'}
-            </button>
+                  {/* Social Login */}
+                  <button
+                    onClick={handleGoogleSignIn}
+                    className="group relative w-full bg-white text-gray-900 rounded-xl p-3.5 font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-all duration-300"
+                  >
+                    <span className="absolute inset-0 w-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl transition-all duration-500 ease-out group-hover:w-full opacity-0 group-hover:opacity-20"></span>
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                    </svg>
+                    Continue with Google
+                  </button>
+
+                  <div className="relative my-8">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-800"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-4 bg-gray-900 text-gray-500">or continue with email</span>
+                    </div>
+                  </div>
+
+                  {/* Error Message */}
+                  {authError && (
+                    <div className="mb-6 animate-shake">
+                      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3">
+                        <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-red-400 text-sm">{authError}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Login Form */}
+                  <form onSubmit={handleAuth} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300 block">Email</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={inputStyle}
+                        placeholder="Enter your email"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-300 block">Password</label>
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className={inputStyle}
+                        placeholder="Enter your password"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className={gradientButtonStyle}
+                    >
+                      <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 group-hover:opacity-100 group-hover:transition-opacity"></span>
+                      {isLoading ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                          <span>{isLoginMode ? 'Signing in...' : 'Creating account...'}</span>
+                        </div>
+                      ) : (
+                        <span>{isLoginMode ? 'Sign in' : 'Create account'}</span>
+                      )}
+                    </button>
+                  </form>
+
+                  {/* Toggle Login/Register */}
+                  <p className="mt-6 text-center text-sm text-gray-400">
+                    {isLoginMode ? "Don't have an account?" : "Already have an account?"}{' '}
+                    <button
+                      onClick={() => {
+                        setIsLoginMode(!isLoginMode);
+                        setAuthError('');
+                      }}
+                      className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                    >
+                      {isLoginMode ? 'Register now' : 'Sign in'}
+                    </button>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -677,16 +740,18 @@ const handleSaveAlert = async (alertItem) => {
                   </div>
                 ) : filteredAlerts.length > 0 ? (
                   filteredAlerts.map(alert => (
-                    <AlertCard
-                      key={alert.id}
-                      alert={alert}
-                      onUpvote={() => handleUpvote(alert.id)}
-                      onShare={() => handleShare(alert)}
-                      onSave={() => handleSaveAlert(alert)}
-                      onImageClick={() => handleImageClick(alert.imageUrl)}
-                      isUpvoting={upvotingId === alert.id}
-                      isSaved={user?.savedAlerts?.includes(alert.id)}
-                    />
+                    <div className={alertCardStyle}>
+                      <AlertCard
+                        key={alert.id}
+                        alert={alert}
+                        onUpvote={() => handleUpvote(alert.id)}
+                        onShare={() => handleShare(alert)}
+                        onSave={() => handleSaveAlert(alert)}
+                        onImageClick={() => handleImageClick(alert.imageUrl)}
+                        isUpvoting={upvotingId === alert.id}
+                        isSaved={user?.savedAlerts?.includes(alert.id)}
+                      />
+                    </div>
                   ))
                 ) : (
                   <div className="text-center py-8 text-gray-400">
@@ -731,7 +796,7 @@ const handleSaveAlert = async (alertItem) => {
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="input-field"
+                      className={inputStyle}
                       placeholder="Enter city or district"
                       required
                     />
@@ -797,11 +862,16 @@ const handleSaveAlert = async (alertItem) => {
                 {/* Image Upload Last */}
                 {location && description && (
                   <div>
-                    <label className={`w-full flex flex-col items-center px-4 py-6 bg-gray-700 
-                      text-gray-300 rounded-lg tracking-wide border-2 border-dashed border-gray-600 
-                      cursor-pointer hover:bg-gray-650 transition-colors ${
-                        isProcessing ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}>
+                    <label className={`
+  w-full flex flex-col items-center px-4 py-6
+  bg-gray-800/50 backdrop-blur-sm
+  border-2 border-dashed border-gray-600
+  rounded-xl
+  cursor-pointer
+  transition-all duration-300
+  hover:border-blue-500/50 hover:bg-gray-800/70
+  ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}
+`}>
                       {isProcessing ? (
                         <div className="flex flex-col items-center">
                           <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full"></div>
@@ -855,11 +925,11 @@ const handleSaveAlert = async (alertItem) => {
                 <button
                   type="submit"
                   disabled={isUploading || !imageFile || !location || !description}
-                  className={`w-full py-2 rounded ${
+                  className={`${gradientButtonStyle} w-full py-3 ${
                     isUploading || !imageFile || !location || !description
-                      ? 'bg-gray-600 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  } transition-colors`}
+                      ? 'opacity-50 cursor-not-allowed'
+                      : ''
+                  }`}
                 >
                   {isUploading ? (
                     <div className="flex items-center justify-center gap-2">
@@ -883,57 +953,68 @@ const handleSaveAlert = async (alertItem) => {
         )}
       </main>
 
-      <footer className="bg-gray-800 text-white py-8 mt-auto">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
+      <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 mt-auto relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 bg-auth-pattern opacity-5"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
+        
+        <div className="container mx-auto px-6 relative">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            {/* About Section */}
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">About ResQTech</h3>
               <p className="text-gray-400 text-sm">
                 Real-time disaster monitoring and management system for communities in need.
               </p>
             </div>
-            
-            <div>
+      
+            {/* Quick Links Section */}
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                <li><Link to="/" className="text-gray-400 hover:text-white text-sm transition-colors">Home</Link></li>
-                <li><Link to="/relocation" className="text-gray-400 hover:text-white text-sm transition-colors">Relocation</Link></li>
-                <li><Link to="/community-help" className="text-gray-400 hover:text-white text-sm transition-colors">Community Help</Link></li>
-                <li><Link to="/mitigation" className="text-gray-400 hover:text-white text-sm transition-colors">Mitigation</Link></li>
-                <li><Link to="/about" className="text-gray-400 hover:text-white text-sm transition-colors">About</Link></li>
+                <li><Link to="/" className="text-gray-400 hover:text-white text-sm">Home</Link></li>
+                <li><Link to="/relocation" className="text-gray-400 hover:text-white text-sm">Relocation</Link></li>
+                <li><Link to="/community-help" className="text-gray-400 hover:text-white text-sm">Community Help</Link></li>
+                <li><Link to="/mitigation" className="text-gray-400 hover:text-white text-sm">Mitigation</Link></li>
+                <li><Link to="/about" className="text-gray-400 hover:text-white text-sm">About</Link></li>
               </ul>
             </div>
-            
-            <div>
+      
+            {/* Emergency Contacts Section */}
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">Emergency Contacts</h3>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>National Emergency: 112</li>
                 <li>Ambulance: 108</li>
                 <li>Police: 100</li>
                 <li>Fire: 101</li>
-                <li>Disaster Management: 1078</li>
               </ul>
             </div>
-            
-            <div>
+      
+            {/* Social Links Section */}
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
               <div className="flex space-x-4">
-                <button type="button" className="text-gray-400 hover:text-white transition-colors" aria-label="Facebook">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <button type="button" className="text-gray-400 hover:text-white">
+                  <span className="sr-only">Facebook</span>
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
                   </svg>
                 </button>
-                <button type="button" className="text-gray-400 hover:text-white transition-colors" aria-label="Twitter">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+                <button type="button" className="text-gray-400 hover:text-white">
+                  <span className="sr-only">Twitter</span>
+                  <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"/>
                   </svg>
                 </button>
               </div>
             </div>
           </div>
-          
-          <div className="mt-8 border-t border-gray-700 pt-8 text-center text-sm text-gray-400">
-            © {new Date().getFullYear()} ResQTech. All rights reserved.
+      
+          <div className="mt-8 border-t border-gray-700 pt-8">
+            <div className="text-center text-sm text-gray-400">
+              © {new Date().getFullYear()} ResQTech. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>

@@ -56,6 +56,25 @@ const getStateRegion = (stateName) => {
   return 'Central India'; // default
 };
 
+// Add these animation variants after your imports
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.3
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0
+  }
+};
+
 const SearchBar = ({ onSearch }) => (
   <div className="relative max-w-2xl mx-auto mb-12">
     <input
@@ -1349,23 +1368,65 @@ function About() {
         </div>
 
         {/* About Section - Moved down */}
-        <section className="max-w-3xl mx-auto text-center">
-          <motion.h2 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-3xl font-bold text-white mb-6"
+        <section className="max-w-4xl mx-auto mb-20">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="bg-gradient-to-b from-gray-800/50 to-gray-800/30 backdrop-blur-sm 
+              border border-gray-700/50 rounded-2xl p-8 shadow-xl"
           >
-            About ResQTech
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-gray-300 text-lg"
-          >
-            ResQTech is a comprehensive disaster management platform providing real-time assistance 
-            and guidance during various types of disasters. Our mission is to help communities 
-            prepare for, respond to, and recover from disasters effectively.
-          </motion.p>
+            <motion.h2 
+              variants={itemVariants}
+              className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r 
+                from-blue-400 to-purple-500 mb-8 text-center"
+            >
+              About ResQTech
+            </motion.h2>
+
+            <motion.div 
+              variants={itemVariants}
+              className="grid md:grid-cols-2 gap-8 mb-8"
+            >
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-blue-400">Our Mission</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  ResQTech is dedicated to revolutionizing disaster management through 
+                  technology. We provide real-time monitoring, early warnings, and 
+                  comprehensive support during various types of disasters.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-purple-400">Our Impact</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  We've helped communities across India prepare for, respond to, and 
+                  recover from disasters effectively. Our platform connects those in need 
+                  with emergency services and relief organizations.
+                </p>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              variants={itemVariants}
+              className="grid md:grid-cols-3 gap-6 text-center"
+            >
+              <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+                <div className="text-blue-400 text-4xl font-bold mb-2">24/7</div>
+                <div className="text-gray-300">Emergency Support</div>
+              </div>
+
+              <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+                <div className="text-purple-400 text-4xl font-bold mb-2">One Stop</div>
+                <div className="text-gray-300">For all Disaster needs</div>
+              </div>
+
+              <div className="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50">
+                <div className="text-blue-400 text-4xl font-bold mb-2">28+</div>
+                <div className="text-gray-300">States Covered</div>
+              </div>
+            </motion.div>
+          </motion.div>
         </section>
       </main>
 

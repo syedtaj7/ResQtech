@@ -671,6 +671,8 @@ function Mitigation() {
   const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'pre');
   const [selectedGuide, setSelectedGuide] = useState(null);
   const [bookmarks, setBookmarks] = useLocalStorage('bookmarkedGuides', []);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredSections, setFilteredSections] = useState(DISASTER_BOXES[activeTab]);
 
   useEffect(() => {
     // Handle incoming disaster selection
@@ -714,6 +716,24 @@ function Mitigation() {
     }
   }, []);
 
+  const handleSearch = useCallback((query) => {
+    const normalizedQuery = query.toLowerCase();
+    setSearchQuery(query);
+    
+    const filtered = DISASTER_BOXES[activeTab].map(section => ({
+      ...section,
+      items: section.items.filter(item =>
+        item.name.toLowerCase().includes(normalizedQuery) ||
+        (DISASTER_GUIDES[activeTab][item.id]?.some(guide => 
+          guide.title.toLowerCase().includes(normalizedQuery) ||
+          guide.content.toLowerCase().includes(normalizedQuery)
+        ))
+      )
+    })).filter(section => section.items.length > 0);
+    
+    setFilteredSections(filtered);
+  }, [activeTab]);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-900">
       {/* Header */}
@@ -733,6 +753,48 @@ function Mitigation() {
       </header>
 
       <main className="flex-grow container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <div className="max-w-2xl mx-auto relative">
+            <input
+              type="text"
+              placeholder="Search for disasters, guides, or keywords..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="w-full px-4 py-3 pl-12 pr-10 
+                bg-gray-800 text-white 
+                placeholder-gray-400
+                border border-gray-700 
+                rounded-xl
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 
+                transition-all duration-300"
+            />
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+              <svg 
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                />
+              </svg>
+            </div>
+            {searchQuery && (
+              <button
+                onClick={() => handleSearch('')}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
         <div className="max-w-4xl mx-auto mb-8 text-center">
           <h1 className="text-4xl font-bold text-white mb-4">
             Disaster Management Guidelines
@@ -768,7 +830,7 @@ function Mitigation() {
 
         {/* Disaster Sections */}
         <div className="space-y-12">
-          {DISASTER_BOXES[activeTab].map((section) => (
+          {filteredSections.map((section) => (
             <DisasterSection
               key={section.id}
               section={section}

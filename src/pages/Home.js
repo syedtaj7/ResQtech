@@ -1,29 +1,89 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { MapContainer, TileLayer, Popup, Rectangle, Polygon } from 'react-leaflet';
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { MapContainer, TileLayer, Popup, Rectangle, Polygon, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
 
-// Add this after the icons constant
+// Update the severityColors constant for map markers
 const severityColors = {
   high: {
-    color: '#ef4444', // red-500
-    fillColor: '#ef4444',
-    fillOpacity: 0.3,
+    color: '#dc2626', // red-600
+    fillColor: '#dc2626',
+    fillOpacity: 0.4,
     weight: 2
   },
   moderate: {
-    color: '#f59e0b', // yellow-500
-    fillColor: '#f59e0b',
-    fillOpacity: 0.3,
+    color: '#d97706', // amber-600
+    fillColor: '#d97706',
+    fillOpacity: 0.4,
     weight: 2
   },
   low: {
-    color: '#10b981', // green-500
-    fillColor: '#10b981',
-    fillOpacity: 0.3,
+    color: '#059669', // emerald-600
+    fillColor: '#059669',
+    fillOpacity: 0.4,
     weight: 2
+  }
+};
+
+// Update the disasterTypeColors constant
+const disasterTypeColors = {
+  'Weather Warning': {
+    bg: 'bg-sky-100',
+    border: 'border-sky-400',
+    text: 'text-sky-900',
+    title: 'text-sky-950',
+    details: 'text-sky-800'
+  },
+  'Earthquake': {
+    bg: 'bg-rose-100',
+    border: 'border-rose-400',
+    text: 'text-rose-900',
+    title: 'text-rose-950',
+    details: 'text-rose-800'
+  },
+  'Landslide Warning': {
+    bg: 'bg-orange-100',
+    border: 'border-orange-400',
+    text: 'text-orange-900',
+    title: 'text-orange-950',
+    details: 'text-orange-800'
+  },
+  'Air Quality Warning': {
+    bg: 'bg-violet-100',
+    border: 'border-violet-400',
+    text: 'text-violet-900',
+    title: 'text-violet-950',
+    details: 'text-violet-800'
+  },
+  'Flash Flood': {
+    bg: 'bg-indigo-100',
+    border: 'border-indigo-400',
+    text: 'text-indigo-900',
+    title: 'text-indigo-950',
+    details: 'text-indigo-800'
+  },
+  'Cyclone': {
+    bg: 'bg-emerald-100',
+    border: 'border-emerald-400',
+    text: 'text-emerald-900',
+    title: 'text-emerald-950',
+    details: 'text-emerald-800'
+  },
+  'Wildfire': {
+    bg: 'bg-red-100',
+    border: 'border-red-400',
+    text: 'text-red-900',
+    title: 'text-red-950',
+    details: 'text-red-800'
+  },
+  'default': {
+    bg: 'bg-slate-100',
+    border: 'border-slate-400',
+    text: 'text-slate-900',
+    title: 'text-slate-950',
+    details: 'text-slate-800'
   }
 };
 
@@ -124,7 +184,55 @@ const locations = {
   'udaipur': [24.5854, 73.7125],
   'rishikesh': [30.0869, 78.2676],
   'madurai': [9.9252, 78.1198],
-  'amritsar': [31.6340, 74.8723]
+  'amritsar': [31.6340, 74.8723],
+
+  // Additional Major Cities
+  'goa': [15.2993, 74.1240],
+  'nashik': [20.0059, 73.7897],
+  'aurangabad': [19.8762, 75.3433],
+  'rajkot': [22.3039, 70.8022],
+  'dhanbad': [23.7957, 86.4304],
+  'nellore': [14.4426, 79.9865],
+  'tirupati': [13.6288, 79.4192],
+  'mysore': [12.2958, 76.6394],
+  'hubli': [15.3647, 75.1240],
+  'jalandhar': [31.3260, 75.5762],
+
+  // Hill Stations & Tourist Places
+  'kullu': [31.9592, 77.1089],
+  'manali': [32.2432, 77.1892],
+  'mcleodganj': [32.2427, 76.3234],
+  'mahabaleshwar': [17.9307, 73.6477],
+  'lonavala': [18.7546, 73.4062],
+  'matheran': [18.9866, 73.2707],
+  'panchgani': [17.9240, 73.8140],
+  'cherrapunji': [25.2800, 91.7200],
+  'mussorie': [30.4598, 78.0644],
+  'ooty': [11.4102, 76.6950],
+
+  // Coastal Cities (Additional Monitoring)
+  'alibag': [18.6411, 72.8724],
+  'daman': [20.3974, 72.8328],
+  'karwar': [14.8137, 74.1279],
+  'kundapur': [13.6223, 74.6923],
+  'puri': [19.8135, 85.8312],
+  'rameswaram': [9.2876, 79.3129],
+  'varkala': [8.7378, 76.7164],
+  'kovalam': [8.4004, 76.9787],
+  'digha': [21.6267, 87.5090],
+  'chilika': [19.7147, 85.3317],
+
+  // Industrial Hubs (Environmental Focus)
+  'ankleshwar': [21.6266, 73.0020],
+  'vapi': [20.3893, 72.9067],
+  'haldia': [22.0667, 88.0694],
+  'korba': [22.3595, 82.7501],
+  'singrauli': [24.1997, 82.6747],
+  'bellary': [15.1394, 76.9214],
+  'bhilai': [21.2090, 81.4280],
+  'bokaro': [23.6693, 86.1511],
+  'jharsuguda': [21.8596, 84.0066],
+  'angul': [20.8400, 85.1016]
 };
 
 const defaultCenter = [20.5937, 78.9629];
@@ -147,9 +255,10 @@ const API_KEYS = {
 // Update fetchOpenWeatherData to use current weather, forecast, and air quality
 const fetchOpenWeatherData = async (locations) => {
   const weatherData = [];
-  try {
-    console.log('Fetching weather data...');
-    const promises = Object.entries(locations).map(async ([location, coords]) => {
+    try {
+      console.log('Fetching weather data...');
+      const localPredictions = [];
+      const promises = Object.entries(locations).map(async ([location, coords]) => {
       try {
         const [lat, lon] = coords;
         console.log(`Fetching data for ${location} at ${lat},${lon}`);
@@ -179,125 +288,14 @@ const fetchOpenWeatherData = async (locations) => {
             rain: current.rain?.['1h'] || 0,
             snow: current.snow?.['1h'] || 0,
             visibility: current.visibility || 10000,
-            clouds: current.clouds?.all || 0
+            clouds: current.clouds?.all || 0,
+            location: location, // Add location name
+            feelsLike: current.main.feels_like,
+            windGust: (current.wind?.gust || 0) * 3.6,
+            dewPoint: current.main.temp - ((100 - current.main.humidity) / 5)
           };
 
-          const warnings = [];
-          let severity = 'low';
-
-          // Heat Related
-          if (conditions.temp > 45) {
-            severity = 'high';
-            warnings.push('Extreme Heat Wave - Health Emergency');
-          } else if (conditions.temp > 40) {
-            severity = 'high';
-            warnings.push('Severe Heat Wave Warning');
-          } else if (conditions.temp > 35) {
-            severity = 'moderate';
-            warnings.push('Heat Wave Alert');
-          }
-
-          // Cold Related
-          if (conditions.temp < 2) {
-            severity = 'high';
-            warnings.push('Extreme Cold Wave - Frost Risk');
-          } else if (conditions.temp < 5) {
-            severity = 'high';
-            warnings.push('Severe Cold Wave Warning');
-          } else if (conditions.temp < 10) {
-            severity = 'moderate';
-            warnings.push('Cold Wave Alert');
-          }
-
-          // Rainfall & Flooding
-          if (conditions.rain > 150) {
-            severity = 'high';
-            warnings.push('Extreme Rainfall - Severe Flood Risk');
-          } else if (conditions.rain > 100) {
-            severity = 'high';
-            warnings.push('Very Heavy Rainfall - Flash Flood Warning');
-          } else if (conditions.rain > 50) {
-            severity = 'high';
-            warnings.push('Heavy Rainfall - Flood Alert');
-          } else if (conditions.rain > 25) {
-            severity = 'moderate';
-            warnings.push('Moderate Rainfall Warning');
-          }
-
-          // Wind Conditions
-          if (conditions.windSpeed > 166) {
-            severity = 'high';
-            warnings.push('Super Cyclonic Storm (Category 5)');
-          } else if (conditions.windSpeed > 118) {
-            severity = 'high';
-            warnings.push('Very Severe Cyclonic Storm (Category 4)');
-          } else if (conditions.windSpeed > 88) {
-            severity = 'high';
-            warnings.push('Severe Cyclonic Storm (Category 3)');
-          } else if (conditions.windSpeed > 62) {
-            severity = 'moderate';
-            warnings.push('Cyclonic Storm (Category 2)');
-          } else if (conditions.windSpeed > 40) {
-            severity = 'moderate';
-            warnings.push('Strong Wind Advisory');
-          }
-
-          // Pressure Systems
-          if (conditions.pressure < 920) {
-            severity = 'high';
-            warnings.push('Extremely Low Pressure - Super Cyclone Risk');
-          } else if (conditions.pressure < 950) {
-            severity = 'high';
-            warnings.push('Very Low Pressure - Severe Storm Risk');
-          } else if (conditions.pressure < 980) {
-            severity = 'moderate';
-            warnings.push('Low Pressure System - Storm Alert');
-          }
-
-          // Visibility Conditions
-          if (conditions.visibility < 200) {
-            severity = 'high';
-            warnings.push('Dense Fog - Zero Visibility Warning');
-          } else if (conditions.visibility < 500) {
-            severity = 'high';
-            warnings.push('Very Dense Fog - Travel Advisory');
-          } else if (conditions.visibility < 1000) {
-            severity = 'moderate';
-            warnings.push('Moderate Fog Alert');
-          }
-
-          // Drought & Dry Conditions
-          if (conditions.humidity < 20 && conditions.temp > 35 && conditions.rain === 0) {
-            severity = 'high';
-            warnings.push('Severe Drought Conditions - Water Emergency');
-          } else if (conditions.humidity < 30 && conditions.temp > 30 && conditions.rain === 0) {
-            severity = 'high';
-            warnings.push('Drought Warning - Water Conservation Alert');
-          } else if (conditions.humidity < 40 && conditions.temp > 25 && conditions.rain === 0) {
-            severity = 'moderate';
-            warnings.push('Dry Weather Alert - Fire Risk');
-          }
-
-          // Snow Conditions (for northern regions)
-          if (conditions.snow > 30) {
-            severity = 'high';
-            warnings.push('Heavy Snowfall - Avalanche Risk');
-          } else if (conditions.snow > 15) {
-            severity = 'high';
-            warnings.push('Moderate Snowfall - Travel Advisory');
-          } else if (conditions.snow > 5) {
-            severity = 'moderate';
-            warnings.push('Light Snowfall Alert');
-          }
-
-          // Thunderstorm Potential
-          if (conditions.humidity > 80 && conditions.temp > 25 && conditions.pressure < 1000) {
-            severity = 'high';
-            warnings.push('Severe Thunderstorm Risk');
-          } else if (conditions.humidity > 70 && conditions.temp > 22 && conditions.pressure < 1005) {
-            severity = 'moderate';
-            warnings.push('Thunderstorm Possibility');
-          }
+          const { warnings, severity } = analyzeWeatherData(conditions);
 
           // Check forecast for severe weather
           const forecastWarnings = forecast.list
@@ -330,8 +328,11 @@ const fetchOpenWeatherData = async (locations) => {
               windSpeed: (item.wind?.speed || 0) * 3.6,
               rain: (item.rain?.['3h'] || 0) / 3
             }));
+          // Get local predictions
+          const predictions = predictLocalDisasters(conditions);
+          localPredictions.push(...predictions);
 
-          if (warnings.length > 0 || forecastWarnings.length > 0) {
+          if (warnings.length > 0 || forecastWarnings.length > 0 || predictions.length > 0) {
             weatherData.push({
               id: `weather-${location}-${Date.now()}`,
               title: `Weather Alert: ${location}`,
@@ -373,6 +374,80 @@ const fetchOpenWeatherData = async (locations) => {
   }
 
   return weatherData;
+};
+
+// Update the analyzeWeatherData function
+const analyzeWeatherData = (conditions) => {
+  const warnings = [];
+  let severity = 'low';
+
+  // Temperature Warnings
+  if (conditions.temp >= 45) {
+    severity = 'high';
+    warnings.push('Extreme Heat Warning - Heat Wave Conditions');
+  } else if (conditions.temp >= 40) {
+    severity = 'moderate';
+    warnings.push('Heat Advisory - High Temperature Alert');
+  }
+
+  // Cold Temperature Warnings
+  if (conditions.temp <= 5) {
+    severity = 'high';
+    warnings.push('Extreme Cold Warning - Cold Wave Conditions');
+  } else if ( conditions.temp <= 10) {
+    severity = 'moderate';
+    warnings.push('Cold Weather Advisory');
+  }
+
+  // Existing weather checks
+  if (conditions.visibility < 1000 && conditions.windSpeed > 30) {
+    severity = 'high';
+    warnings.push('Dust Storm Warning - Low Visibility');
+  }
+
+  // Heat Index Check
+  const heatIndex = calculateHeatIndex(conditions.temp, conditions.humidity);
+  if (heatIndex > 54) {
+    severity = 'high';
+    warnings.push('Extreme Heat Danger - Heat Stroke Risk');
+  } else if (heatIndex > 41) {
+    severity = 'high';
+    warnings.push('Heat Advisory - Heat Exhaustion Risk');
+  }
+
+  // Wind Chill Check
+  const windChill = calculateWindChill(conditions.temp, conditions.windSpeed);
+  if (windChill < -27) {
+    severity = 'high';
+    warnings.push('Extreme Wind Chill - Frostbite Risk');
+  }
+
+  // Make sure warnings are being added to weather data
+  if (warnings.length > 0) {
+    console.log('Temperature warnings:', warnings);
+  }
+
+  return { warnings, severity };
+};
+
+// Add these helper functions
+const calculateHeatIndex = (temp, humidity) => {
+  // Simplified heat index calculation
+  if (temp < 27) return temp;
+  
+  return -8.784695 + 1.61139411 * temp + 2.338549 * humidity 
+         - 0.14611605 * temp * humidity - 0.012308094 * temp * temp 
+         - 0.016424828 * humidity * humidity + 0.002211732 * temp * temp * humidity 
+         + 0.00072546 * temp * humidity * humidity 
+         - 0.000003582 * temp * temp * humidity * humidity;
+};
+
+const calculateWindChill = (temp, windSpeed) => {
+  // Wind chill calculation
+  if (temp > 10 || windSpeed < 4.8) return temp;
+  
+  return 13.12 + 0.6215 * temp - 11.37 * Math.pow(windSpeed, 0.16) 
+         + 0.3965 * temp * Math.pow(windSpeed, 0.16);
 };
 
 // Update the fetchEarthquakeData function with proper date formatting and parameters
@@ -492,14 +567,16 @@ const fetchTsunamiData = async () => {
     const startDate = thirtyDaysAgo.toISOString().split('T')[0];
     const endDate = today.toISOString().split('T')[0];
 
-    // Using NCDC endpoint instead
+    // Use a proxy or alternative API endpoint
     const response = await fetch(
-      `https://www.ncdc.noaa.gov/cdo-web/api/v2/data?` +
-      `datasetid=GHCND&` +
-      `locationid=FIPS:IN&` + // India specific data
-      `startdate=${startDate}&` +
-      `enddate=${endDate}&` +
-      `limit=1000`, {
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(
+        `https://www.ncdc.noaa.gov/cdo-web/api/v2/data?` +
+        `datasetid=GHCND&` +
+        `locationid=FIPS:IN&` +
+        `startdate=${startDate}&` +
+        `enddate=${endDate}&` +
+        `limit=1000`
+      )}`, {
         headers: {
           'token': API_KEYS.NOAA
         }
@@ -508,17 +585,16 @@ const fetchTsunamiData = async () => {
     
     if (!response.ok) {
       console.warn('NCDC API Response:', await response.text());
-      return [];
+      return []; // Return empty array instead of throwing
     }
     
     const data = await response.json();
     console.log('NCDC Weather data:', data);
 
-    // Transform the data
     return (data?.results || [])
       .filter(record => record.value !== null)
       .map((record, index) => ({
-        id: `weather-${record.station}-${record.date}-${index}`, // Add date and index for uniqueness
+        id: `weather-${record.station}-${record.date}-${index}`,
         title: `Weather Event: ${record.station}`,
         coordinates: [record.latitude || defaultCenter[0], record.longitude || defaultCenter[1]],
         severity: determineWeatherSeverity(record),
@@ -530,7 +606,7 @@ const fetchTsunamiData = async () => {
       }));
   } catch (error) {
     console.error('Error fetching NCDC data:', error);
-    return [];
+    return []; // Return empty array on error
   }
 };
 
@@ -597,6 +673,112 @@ const fetchAirQualityData = async (locations) => {
     return [];
   }
 };
+
+// Add this function for local disaster prediction
+const predictLocalDisasters = (weatherData) => {
+  const predictions = [];
+  
+  // Enhanced weather thresholds
+  if (weatherData.rain > 30 && weatherData.windSpeed > 25) {
+    predictions.push({
+      type: 'Cyclone',
+      severity: weatherData.rain > 50 ? 'high' : 'moderate',
+      probability: 0.8,
+      details: 'Heavy rain and strong winds indicate cyclonic conditions'
+    });
+  }
+
+  // Heat Wave
+  if (weatherData.temp > 40) {
+    predictions.push({
+      type: 'Heat Wave',
+      severity: weatherData.temp > 45 ? 'high' : 'moderate',
+      probability: 0.9,
+      details: `Extreme temperature of ${weatherData.temp}°C poses health risks`
+    });
+  }
+
+  // Cold Wave
+  if (weatherData.temp < 5) {
+    predictions.push({
+      type: 'Cold Wave',
+      severity: weatherData.temp < 0 ? 'high' : 'moderate',
+      probability: 0.9,
+      details: `Severe cold temperature of ${weatherData.temp}°C`
+    });
+  }
+
+  // Flash Floods
+  if (weatherData.rain > 40) {
+    predictions.push({
+      type: 'Flash Flood',
+      severity: weatherData.rain > 60 ? 'high' : 'moderate',
+      probability: 0.85,
+      details: `Heavy rainfall of ${weatherData.rain}mm/h indicates flood risk`
+    });
+  }
+
+  // Drought Conditions
+  if (weatherData.humidity < 30 && weatherData.temp > 35) {
+    predictions.push({
+      type: 'Drought',
+      severity: 'moderate',
+      probability: 0.7,
+      details: 'Low humidity and high temperature indicate drought conditions'
+    });
+  }
+
+  // Landslide Risk (for hilly areas)
+  if (weatherData.rain > 25 && hillStations.includes(weatherData.location)) {
+    predictions.push({
+      type: 'Landslide',
+      severity: weatherData.rain > 40 ? 'high' : 'moderate',
+      probability: 0.75,
+      details: 'Continuous rainfall in hilly terrain increases landslide risk'
+    });
+  }
+
+  // Thunderstorm
+  if (weatherData.clouds > 75 && weatherData.windSpeed > 20) {
+    predictions.push({
+      type: 'Thunderstorm',
+      severity: weatherData.windSpeed > 30 ? 'high' : 'moderate',
+      probability: 0.8,
+      details: 'Cloud coverage and wind conditions indicate thunderstorm possibility'
+    });
+  }
+
+  // Fog Warning
+  if (weatherData.visibility < 1000 && weatherData.humidity > 90) {
+    predictions.push({
+      type: 'Dense Fog',
+      severity: weatherData.visibility < 500 ? 'high' : 'moderate',
+      probability: 0.9,
+      details: 'Low visibility and high humidity indicate dense fog conditions'
+    });
+  }
+
+  return predictions;
+};
+
+// Add this array for hill stations
+const hillStations = [
+  'shimla',
+  'manali',
+  'darjeeling',
+  'mussoorie',
+  'nainital',
+  'gangtok',
+  'ooty',
+  'kodaikanal',
+  'munnar',
+  'dehradun',
+  'shillong',
+  'srinagar',
+  'kalimpong',
+  'dharamshala',
+  'almora'
+];
 
 function Legend() {
   return (
@@ -704,13 +886,23 @@ function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Connect With Us</h3>
             <div className="flex space-x-4">
-              <a href="https://twitter.com/ResQTech" className="text-gray-400 hover:text-white" target="_blank" rel="noopener noreferrer">
+              <a 
+                href="https://twitter.com/ResQTech" 
+                className="text-gray-400 hover:text-white"
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="sr-only">Twitter</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
                 </svg>
               </a>
-              <a href="https://github.com/ResQTech" className="text-gray-400 hover:text-white">
+              <a 
+                href="https://github.com/ResQTech" 
+                className="text-gray-400 hover:text-white"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="sr-only">GitHub</span>
                 <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                   <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"></path>
@@ -727,16 +919,61 @@ function Footer() {
   );
 }
 
+// Add this new component for handling map zooming
+const MapController = ({ location }) => {
+  const map = useMap();
+  const defaultZoom = 5;
+  const defaultCenter = useMemo(() => [20.5937, 78.9629], []); // Center of India
+
+  useEffect(() => {
+    // Handle location changes (zooming in)
+    if (location && map) {
+      const { coordinates, zoom } = location;
+      if (Array.isArray(coordinates) && coordinates.length === 2) {
+        map.flyTo(coordinates, zoom || 8, {
+          duration: 1.5,
+          easeLinearity: 0.25
+        });
+      }
+    }
+
+    // Add click handler for zooming out
+    const handleMapClick = (e) => {
+      // Check if click is directly on the map (not on markers/polygons)
+      const target = e.originalEvent.target;
+      const isMapClick = target.classList.contains('leaflet-container') || 
+                        target.classList.contains('leaflet-tile') ||
+                        target.classList.contains('leaflet-tile-container');
+
+      if (isMapClick) {
+        map.flyTo(defaultCenter, defaultZoom, {
+          duration: 1.5,
+          easeLinearity: 0.25
+        });
+      }
+    };
+
+    map.on('click', handleMapClick);
+
+    // Cleanup
+    return () => {
+      map.off('click', handleMapClick);
+    };
+  }, [map, location, defaultCenter, defaultZoom]);
+
+  return null;
+};
+
 function Home() {
+  const [location, setLocation] = useState(null);
   const [search, setSearch] = useState("");
   const [disasters, setDisasters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mapDisasters, setMapDisasters] = useState([]);
   const [filteredDisasters, setFilteredDisasters] = useState([]);
 
-  // Function to extract coordinates from description or use predefined locations
+  // Remove the notification comment and related code
 
-  // Update the filterDisasters function
   const filterDisasters = useCallback((searchTerm) => {
     console.log('Filtering disasters with term:', searchTerm);
     
@@ -754,7 +991,7 @@ function Home() {
     );
     
     console.log('Matching locations:', matchingLocations);
-  
+
     const filtered = disasters.filter(disaster => {
       // Check if disaster is in any of the matching locations
       const locationMatch = matchingLocations.some(location => {
@@ -790,7 +1027,7 @@ function Home() {
   }
 
   // Update the LocationSuggestions component to clear suggestions after selection
-  function LocationSuggestions({ searchTerm, onSelect }) {
+  const LocationSuggestions = ({ searchTerm, onSelect }) => {
     const [isVisible, setIsVisible] = useState(true);
     const suggestionsRef = useRef(null);
     
@@ -845,77 +1082,102 @@ function Home() {
         </ul>
       </div>
     );
-  }
+  };
 
-  useEffect(() => {
-    const fetchAllDisasterData = async () => {
-      try {
-        setLoading(true);
-        console.log('Starting data fetch...');
-        
-        const [weatherData, earthquakeData, landslideData, tsunamiData, airQualityData] = 
-          await Promise.all([
-            fetchOpenWeatherData(locations).catch(err => {
-              console.error('Weather data error:', err);
-              return [];
-            }),
-            fetchEarthquakeData().catch(err => {
-              console.error('Earthquake data error:', err);
-              return [];
-            }),
-            fetchLandslideData().catch(err => {
-              console.error('Landslide data error:', err);
-              return [];
-            }),
-            fetchTsunamiData().catch(err => {
-              console.error('Tsunami data error:', err);
-              return [];
-            }),
-            fetchAirQualityData(locations).catch(err => {
-              console.error('Air quality data error:', err);
-              return [];
-            }),
-          ]);
+  // Update the zoomToLocation function to handle different zoom levels
+  const handleZoom = useCallback((coordinates, zoomLevel = 8) => {
+    setLocation({
+      coordinates: coordinates,
+      zoom: zoomLevel
+    });
+  }, []);
 
-        console.log('Data received:', {
-          weather: weatherData.length,
-          earthquakes: earthquakeData.length,
-          landslides: landslideData.length,
-          tsunamis: tsunamiData.length,
-          airQuality: airQualityData.length
-        });
+  // Update the handleLocationSelect function
+  const handleLocationSelect = useCallback((location) => {
+    const locationKey = location.toLowerCase();
+    if (locations[locationKey]) {
+      handleZoom(locations[locationKey], 8);
+      setSearch(location);
+      filterDisasters(location);
+    }
+  }, [handleZoom, filterDisasters]);
 
-        
+  const fetchAllDisasterData = async () => {
+    try {
+      setLoading(true);
+      const errors = [];
 
-        const allDisasters = [
-          ...weatherData, 
-          ...earthquakeData, 
-          ...landslideData, 
-          ...tsunamiData, 
-          ...airQualityData,
-        ].filter(Boolean);
+      const [weatherData, earthquakeData, landslideData, tsunamiData, airQualityData] = 
+        await Promise.all([
+          // ...existing fetch calls...
+          fetchOpenWeatherData(locations).catch(err => {
+            errors.push(['Weather', err]);
+            return [];
+          }),
+          fetchEarthquakeData().catch(err => {
+            errors.push(['Earthquake', err]);
+            return [];
+          }),
+          fetchLandslideData().catch(err => {
+            errors.push(['Landslide', err]);
+            return [];
+          }),
+          fetchTsunamiData().catch(err => {
+            errors.push(['Tsunami', err]);
+            return [];
+          }),
+          fetchAirQualityData(locations).catch(err => {
+            errors.push(['Air Quality', err]);
+            return [];
+          })
+        ]);
 
-        console.log('Total disasters found:', allDisasters.length);
-        
-        if (allDisasters.length === 0) {
-          console.log('No disasters found in any API');
+      const allDisasters = [
+        ...weatherData, 
+        ...earthquakeData, 
+        ...landslideData, 
+        ...tsunamiData, 
+        ...airQualityData,
+      ].filter(Boolean).map(disaster => ({
+        ...disaster,
+        id: `${disaster.type}-${disaster.title}-${disaster.date}` // Ensure each disaster has a unique ID
+      }));
+
+      // Log high severity disasters for debugging
+      allDisasters.forEach(disaster => {
+        if (disaster.severity === 'high') {
+          console.log('High severity disaster detected:', {
+            id: disaster.id,
+            title: disaster.title,
+            type: disaster.type,
+            severity: disaster.severity
+          });
         }
+      });
 
-        setMapDisasters(allDisasters);
-        setDisasters(allDisasters);
-        setFilteredDisasters(allDisasters);
+      setMapDisasters(allDisasters);
+      setDisasters(allDisasters);
+      setFilteredDisasters(allDisasters);
 
-      } catch (error) {
-        console.error("Error fetching disaster data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (error) {
+      console.error("Error fetching disaster data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Single useEffect for data fetching
+  useEffect(() => {
     fetchAllDisasterData();
     const interval = setInterval(fetchAllDisasterData, 300000);
-    return () => clearInterval(interval);
-  }, []);
+    
+    return () => {
+      clearInterval(interval);
+      setLoading(false);
+      setDisasters([]);
+      setFilteredDisasters([]);
+    };
+  }, []); // Empty dependency array
 
   useEffect(() => {
     filterDisasters(search);
@@ -941,7 +1203,6 @@ function Home() {
               <MapContainer
                 center={defaultCenter}
                 zoom={5}
-                // Remove maxBounds to allow scrolling
                 minZoom={4}    // Reduced to allow more zooming out
                 maxZoom={13}
                 scrollWheelZoom={true}
@@ -949,6 +1210,12 @@ function Home() {
                 boundsOptions={{
                   padding: [50, 50],
                   animate: true
+                }}
+                // Add click handler to handle click bubbling
+                onClick={(e) => {
+                  if (e.originalEvent.target.classList.contains('leaflet-container')) {
+                    e.originalEvent.stopPropagation();
+                  }
                 }}
               >
                 <TileLayer
@@ -1021,20 +1288,123 @@ function Home() {
                             fillOpacity: 0.4
                           });
                           
-                          const getSeverityReason = (disaster) => {
-                            if (!disaster.details) return '';
-                            const warningsSection = disaster.details.split('Active Warnings:\n')[1];
-                            return warningsSection ? warningsSection.split('\n')[0] : disaster.details.split('\n')[0];
-                          };
-
-                          // Calculate position based on coordinates
-                          const bounds = layer.getBounds();
-                          const center = bounds.getCenter();
-                          const mapHeight = e.target._map.getSize().y;
-                          const pointY = e.target._map.latLngToContainerPoint(center).y;
+                          const getAllWarnings = (disasterGroup) => {
+                            return disasterGroup.map(disaster => {
+                              const warnings = [];
+                              const details = disaster.details || '';
+                              
+                              // Temperature warnings with specific thresholds
+                              if (details.includes('Temperature:')) {
+                                const tempMatch = details.match(/Temperature:\s*([-\d.]+)/);
+                                if (tempMatch) {
+                                  const temp = parseFloat(tempMatch[1]);
+                                  if (temp >= 45) {
+                                    warnings.push('🌡️ Extreme Heat Wave (>45°C)');
+                                  } else if (temp >= 40) {
+                                    warnings.push('🌡️ Heat Wave Warning (40-45°C)');
+                                  } else if (temp <= 5) {
+                                    warnings.push('❄️ Severe Cold Wave (<5°C)');
+                                  } else if (temp <= 10) {
+                                    warnings.push('❄️ Cold Wave Warning (5-10°C)');
+                                  }
+                                }
+                              }
+                              
+                              // Rainfall warnings with specific thresholds
+                              if (details.includes('Rainfall:')) {
+                                const rainMatch = details.match(/Rainfall:\s*([\d.]+)/);
+                                if (rainMatch) {
+                                  const rainfall = parseFloat(rainMatch[1]);
+                                  if (rainfall >= 50) {
+                                    warnings.push('🌧️ Extreme Rainfall Warning (>50mm/h)');
+                                  } else if (rainfall >= 30) {
+                                    warnings.push('🌧️ Heavy Rainfall Alert (30-50mm/h)');
+                                  }
+                                }
+                              }
+                              
+                              // Wind warnings with specific thresholds
+                              if (details.includes('Wind Speed:')) {
+                                const windMatch = details.match(/Wind Speed:\s*([\d.]+)/);
+                                if (windMatch) {
+                                  const windSpeed = parseFloat(windMatch[1]);
+                                  if (windSpeed >= 80) {
+                                    warnings.push('💨 Hurricane Force Winds (>80km/h)');
+                                  } else if (windSpeed >= 60) {
+                                    warnings.push('💨 Storm Force Winds (60-80km/h)');
+                                  } else if (windSpeed >= 40) {
+                                    warnings.push('💨 Strong Wind Alert (40-60km/h)');
+                                  }
+                                }
+                              }
+                              
+                              // Visibility warnings
+                              if (details.includes('Visibility:')) {
+                                const visMatch = details.match(/Visibility:\s*([\d.]+)/);
+                                if (visMatch) {
+                                  const visibility = parseFloat(visMatch[1]);
+                                  if (visibility < 0.5) {
+                                    warnings.push('🌫️ Very Dense Fog (<0.5km)');
+                                  } else if (visibility < 1) {
+                                    warnings.push('🌫️ Dense Fog Warning (<1km)');
+                                  }
+                                }
+                              }
+                              
+                              // Humidity related warnings
+                              if (details.includes('Humidity:')) {
+                                const humidityMatch = details.match(/Humidity:\s*([\d.]+)/);
+                                if (humidityMatch) {
+                                  const humidity = parseFloat(humidityMatch[1]);
+                                  if (humidity >= 95) {
+                                    warnings.push('💧 Extreme Humidity Warning (>95%)');
+                                  } else if (humidity <= 20) {
+                                    warnings.push('🏜️ Very Dry Conditions (<20%)');
+                                  }
+                                }
+                              }
                           
-                          // Choose direction based on position
-                          const tooltipDirection = pointY < mapHeight/2 ? 'bottom' : 'top';
+                              // Air Quality warnings
+                              if (details.includes('Air Quality Index:')) {
+                                const aqiMatch = details.match(/Air Quality Index:\s*([\d.]+)/);
+                                if (aqiMatch) {
+                                  const aqi = parseFloat(aqiMatch[1]);
+                                  if (aqi >= 4) {
+                                    warnings.push('😷 Hazardous Air Quality');
+                                  } else if (aqi >= 3) {
+                                    warnings.push('😷 Poor Air Quality');
+                                  }
+                                }
+                              }
+                              
+                              // Natural disaster specific warnings
+                              if (disaster.type === 'Earthquake') {
+                                const magMatch = details.match(/Magnitude:\s*([\d.]+)/);
+                                if (magMatch) {
+                                  const magnitude = parseFloat(magMatch[1]);
+                                  if (magnitude >= 6.0) {
+                                    warnings.push('🌋 Major Earthquake (M6.0+)');
+                                  } else if (magnitude >= 5.0) {
+                                    warnings.push('🌋 Moderate Earthquake (M5.0+)');
+                                  }
+                                }
+                              }
+                              
+                              if (disaster.type === 'Landslide Warning') {
+                                warnings.push('⛰️ Landslide Risk Alert');
+                              }
+                              
+                              if (details.includes('Tsunami Risk: Yes')) {
+                                warnings.push('🌊 Tsunami Risk Alert');
+                              }
+                              
+                              return {
+                                type: disaster.type,
+                                severity: disaster.severity,
+                                warnings: warnings
+                              };
+                            });
+                          };
 
                           const tooltipContent = `
                             <div class="bg-white p-3 rounded-lg shadow-md text-sm">
@@ -1042,18 +1412,28 @@ function Home() {
                               <p class="text-${maxSeverity === 'high' ? 'red' : maxSeverity === 'moderate' ? 'yellow' : 'green'}-600">
                                 ${maxSeverity.charAt(0).toUpperCase() + maxSeverity.slice(1)} Severity
                               </p>
-                              <p class="text-gray-700 mt-1">
-                                ${getSeverityReason(mainDisaster)}
-                              </p>
-                              <p class="text-gray-600 mt-1">${disasterGroup.length} active warning${disasterGroup.length > 1 ? 's' : ''}</p>
+                              <div class="mt-2">
+                                <p class="font-medium text-gray-700">Active Warnings:</p>
+                                <ul class="mt-1 space-y-1">
+                                  ${getAllWarnings(disasterGroup).map(item => 
+                                    item.warnings.map(warning => `
+                                      <li class="text-gray-600 flex items-center">
+                                        <span class="w-2 h-2 rounded-full bg-${item.severity === 'high' ? 'red' : item.severity === 'moderate' ? 'amber' : 'emerald'}-500 mr-2"></span>
+                                        ${warning}
+                                      </li>
+                                    `).join('')
+                                  ).join('')}
+                                </ul>
+                              </div>
+                              <p class="text-gray-600 mt-2">${disasterGroup.length} active warning${disasterGroup.length > 1 ? 's' : ''}</p>
                             </div>
                           `;
-                          
+
                           layer.bindTooltip(tooltipContent, {
                             permanent: false,
-                            direction: tooltipDirection,
+                            direction: 'top',
                             className: 'custom-tooltip',
-                            offset: [0, tooltipDirection === 'bottom' ? 20 : -20]
+                            offset: [0, -10]
                           }).openTooltip();
                         },
                         mouseout: (e) => {
@@ -1062,63 +1442,158 @@ function Home() {
                             fillOpacity: 0.2
                           });
                           layer.unbindTooltip();
+                        },
+                        click: (e) => {
+                          const layer = e.target;
+                          const bounds = layer.getBounds();
+                          const center = bounds.getCenter();
+                          if (center) {
+                            handleZoom([center.lat, center.lng], 10);
+                          }
                         }
                       }}
                     >
                       <Popup 
                         className="custom-popup"
                         autoPan={true}
-                        autoPanPadding={[150, 150]}  // Increased padding
+                        autoPanPadding={[150, 150]}
                         keepInView={true}
-                        maxWidth={300}
-                        // Smarter positioning logic
-                        position={(() => {
-                          const isNorth = lat > 25;
-                          const isEast = lon > 85;
-                          return [
-                            isNorth ? lat - 2 : lat + 1,  // Move popup further up/down
-                            isEast ? lon - 2 : lon + 1     // Move popup left/right if needed
-                          ];
-                        })()}
+                        maxWidth={350} // Increased from 300
                       >
-                        <div 
-                          className="bg-white rounded-lg shadow-md" 
-                          style={{ 
-                            width: '300px',
-                            maxHeight: '60vh'  // Reduced max height
-                          }}
-                        >
-                          <div className="p-4 overflow-y-auto" style={{ maxHeight: '55vh' }}>
-                            <h3 className="font-bold text-lg text-gray-900 mb-2">
-                              Alerts for {mainDisaster.title.split(':')[1]?.trim() || 'this Location'}
+                        <div className="rounded-xl shadow-lg bg-gray-800" style={{ maxHeight: '500px' }}>
+                          {/* Header section with custom gradient */}
+                          <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700 rounded-t-xl">
+                            <h3 className="font-bold text-xl text-white flex items-center gap-2">
+                              <svg className="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                  d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                />
+                              </svg>
+                              <span className="truncate text-white">
+                                {mainDisaster.title.split(':')[1]?.trim() || 'this Location'}
+                              </span>
                             </h3>
-                            {disasterGroup.map((disaster, index) => (
-                              <div key={disaster.id || index} className="mb-4 pb-4 border-b border-gray-200 last:border-0">
-                                <h4 className="font-bold text-gray-900">{disaster.title}</h4>
-                                <p className="text-red-600 font-semibold">{disaster.type}</p>
-                                <p className="text-gray-700">Severity: {disaster.severity}</p>
-                                <div className="mt-2 text-sm text-gray-600 whitespace-pre-line">
-                                  {disaster.details}
-                                </div>
-                                <p className="text-gray-600 text-sm mt-2">
-                                  {new Date(disaster.date).toLocaleDateString('en-IN', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </p>
-                                <a 
-                                  href={disaster.url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline text-sm mt-2 inline-block"
-                                >
-                                  More Info
-                                </a>
-                              </div>
-                            ))}
+                          </div>
+
+                          {/* Updated Content section with severity reasons */}
+                          <div className="overflow-y-auto" style={{ maxHeight: '400px' }}>
+                            <div className="p-4 space-y-4">
+                              {disasterGroup.map((disaster, index) => {
+                                // Extract severity reasons from details
+                                const severityReasons = disaster.details.split('\n')
+                                  .filter(line => 
+                                    line.includes('Warning') || 
+                                    line.includes('Alert') || 
+                                    line.includes('Risk') ||
+                                    line.includes('Danger')
+                                  );
+
+                                return (
+                                  <div 
+                                    key={disaster.id || index} 
+                                    className={`rounded-lg overflow-hidden transition-all hover:shadow-md border ${
+                                      disaster.severity === 'high' ? 'border-red-500/30 bg-red-900/20' :
+                                      disaster.severity === 'moderate' ? 'border-amber-500/30 bg-amber-900/20' :
+                                      'border-emerald-500/30 bg-emerald-900/20'
+                                    }`}
+                                  >
+                                    {/* Alert Header with Severity Reasons */}
+                                    <div className={`p-3 border-b ${
+                                      disaster.severity === 'high' ? 'border-red-500/30 bg-gradient-to-r from-red-900/40 to-red-800/40' :
+                                      disaster.severity === 'moderate' ? 'border-amber-500/30 bg-gradient-to-r from-amber-900/40 to-amber-800/40' :
+                                      'border-emerald-500/30 bg-gradient-to-r from-emerald-900/40 to-emerald-800/40'
+                                    }`}>
+                                      <div className="flex items-center justify-between">
+                                        <h4 className="font-semibold text-white">{disaster.type}</h4>
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                                          disaster.severity === 'high' ? 'bg-red-500/20 text-red-100 border border-red-500/30' :
+                                          disaster.severity === 'moderate' ? 'bg-amber-500/20 text-amber-100 border border-amber-500/30' :
+                                          'bg-emerald-500/20 text-emerald-100 border border-emerald-500/30'
+                                        }`}>
+                                          {disaster.severity}
+                                        </span>
+                                      </div>
+                                      {/* Add Severity Reasons */}
+                                      {severityReasons.length > 0 && (
+                                        <div className="mt-2 text-sm text-gray-300">
+                                          <p className="font-medium mb-1">Reasons for {disaster.severity} severity:</p>
+                                          <ul className="list-disc list-inside space-y-1 text-gray-400">
+                                            {severityReasons.map((reason, i) => (
+                                              <li key={i}>{reason}</li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Rest of the content remains the same */}
+                                    <div className="p-4 bg-gray-800/50">
+                                      <p className="text-sm text-gray-200 leading-relaxed">{disaster.details}</p>
+                                      
+                                      {/* Add this new button section */}
+                                      <div className="mt-4 mb-2">
+                                        <Link
+                                          to={`/mitigation?type=${encodeURIComponent(disaster.type)}`}
+                                          className="w-full inline-flex items-center justify-center px-4 py-2.5 
+                                            bg-gradient-to-r from-blue-600 to-blue-700 
+                                            hover:from-blue-500 hover:to-blue-600
+                                            text-white font-medium rounded-lg 
+                                            shadow-lg shadow-blue-500/20
+                                            transition-all duration-200 
+                                            border border-blue-600/20
+                                            hover:scale-[1.02]
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500/50 
+                                            gap-2"
+                                        >
+                                          <svg 
+                                            className="w-5 h-5 text-blue-100" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path 
+                                              strokeLinecap="round" 
+                                              strokeLinejoin="round" 
+                                              strokeWidth={2} 
+                                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                                            />
+                                          </svg>
+                                          <span className="text-blue-50">View Precautions</span>
+                                        </Link>
+                                      </div>
+
+                                      {/* Existing footer section */}
+                                      <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-700">
+                                        <time className="text-xs text-gray-400">
+                                          {new Date(disaster.date).toLocaleDateString('en-IN', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                          })}
+                                        </time>
+                                        <a 
+                                          href={disaster.url} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 group"
+                                        >
+                                          More Info
+                                          <svg 
+                                            className="w-4 h-4 transition-transform group-hover:translate-x-0.5" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                                          </svg>
+                                        </a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       </Popup>
@@ -1126,34 +1601,26 @@ function Home() {
                   );
                 })}
                 <Legend />
+                <MapController location={location} />
               </MapContainer>
             </div>
           </div>
 
-          <div className="col-span-1 bg-gray-800 p-5 rounded-lg flex flex-col h-[calc(600px+2.5rem)]">
-            <h2 className="text-lg font-semibold mb-3">Search Your Area</h2>
+          {/* Update the search bar and results styling */}
+          <div className="col-span-1 bg-gray-700 p-5 rounded-xl shadow-lg flex flex-col h-[calc(600px+2.5rem)]">
+            <h2 className="text-lg font-semibold mb-3 text-white">Search Your Area</h2>
             <div className="relative mb-4">
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search by city name, disaster type, or severity..."
-                  className="w-full p-2 pl-10 pr-10 rounded-md bg-gray-700 text-white placeholder-gray-400 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  placeholder="Search by city name, disaster type..."
+                  className="w-full p-3 pl-10 pr-10 rounded-xl bg-gray-600 text-white placeholder-gray-300 
+                    border border-gray-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 
+                    focus:ring-opacity-50 transition-all"
                   value={search}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    setSearch(value);
-                    filterDisasters(value);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const matchingLocations = Object.keys(locations).filter(location =>
-                        location.toLowerCase().includes(search.toLowerCase())
-                      );
-                      if (matchingLocations.length > 0) {
-                        setSearch(matchingLocations[0]);
-                        filterDisasters(matchingLocations[0]);
-                      }
-                    }
+                    setSearch(e.target.value);
+                    filterDisasters(e.target.value);
                   }}
                 />
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -1182,33 +1649,35 @@ function Home() {
               </div>
               <LocationSuggestions 
                 searchTerm={search} 
-                onSelect={(location) => {
-                  setSearch(location);
-                  filterDisasters(location);
-                }} 
+                onSelect={handleLocationSelect} 
               />
             </div>
 
+            {/* Update the disaster reports list styling */}
             <div className="flex-1 overflow-hidden flex flex-col">
-              <h2 className="text-lg font-semibold mb-3">Latest Indian Disaster Reports</h2>
-              <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar">
-                <ul className="space-y-2">
-                  {loading ? (
-                    <li className="bg-gray-700 p-3 rounded-md">Loading latest disaster reports...</li>
-                  ) : filteredDisasters.length > 0 ? (
-                    filteredDisasters.map((disaster, index) => (
-                      <li 
-                        key={`${disaster.id}-${index}`} // Combine id with index for guaranteed uniqueness
-                        className="bg-gray-700 p-3 rounded-md hover:bg-gray-600 transition-colors"
+              <h2 className="text-lg font-semibold mb-3 text-white">Latest Indian Disaster Reports</h2>
+              <div className="overflow-y-auto flex-1 pr-2 custom-scrollbar space-y-3">
+                {loading ? (
+                  <div className="bg-gray-600 p-4 rounded-xl animate-pulse">
+                    <div className="h-4 bg-gray-500 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-500 rounded w-1/2"></div>
+                  </div>
+                ) : filteredDisasters.length > 0 ? (
+                  filteredDisasters.map((disaster, index) => {
+                    const typeColors = disasterTypeColors[disaster.type] || disasterTypeColors.default;
+                    return (
+                      <div 
+                        key={`${disaster.id}-${index}`}
+                        className={`p-4 rounded-xl transition-all hover:shadow-lg ${typeColors.bg}`}
                       >
                         <div>
-                          <h4 className="font-bold text-white">{disaster.title}</h4>
-                          <p className="text-red-400">{disaster.type}</p>
-                          <p className="text-gray-300">Severity: {disaster.severity}</p>
-                          <div className="mt-2 text-sm text-gray-400 whitespace-pre-line">
+                          <h4 className={`font-bold ${typeColors.title}`}>{disaster.title}</h4>
+                          <p className={`font-semibold ${typeColors.text}`}>{disaster.type}</p>
+                          <p className={`text-sm ${typeColors.details}`}>Severity: {disaster.severity}</p>
+                          <div className={`mt-2 text-sm ${typeColors.details} whitespace-pre-line`}>
                             {disaster.details}
                           </div>
-                          <p className="text-gray-500 text-sm mt-2">
+                          <p className={`text-sm mt-2 ${typeColors.details}`}>
                             {new Date(disaster.date).toLocaleDateString('en-IN', {
                               year: 'numeric',
                               month: 'short',
@@ -1226,14 +1695,14 @@ function Home() {
                             More Info
                           </a>
                         </div>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="bg-gray-700 p-3 rounded-md">
-                      {search.trim() ? 'No disasters found for this location' : 'No recent disaster reports found'}
-                    </li>
-                  )}
-                </ul>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="bg-gray-600 p-4 rounded-xl text-gray-300 text-center">
+                    {search.trim() ? 'No disasters found for this location' : 'No recent disaster reports found'}
+                  </div>
+                )}
               </div>
             </div>
           </div>
